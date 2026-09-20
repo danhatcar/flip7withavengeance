@@ -305,6 +305,10 @@
 
   function uid(){ return Math.random().toString(36).slice(2, 10); }
   function colorFor(index){ return PLAYER_COLORS[index % PLAYER_COLORS.length]; }
+  function buzz(ms){
+    try { if(navigator.vibrate) navigator.vibrate(ms || 10); }
+    catch(e) { /* no-op if unsupported */ }
+  }
 
   function defaultState(){
     return {
@@ -427,10 +431,22 @@
     if(maxTotal < state.target) return;
     var winners = state.players.filter(function(p){ return p.total === maxTotal; });
     var names = winners.map(function(p){ return p.name; }).join(" & ");
+    var newGameBtn = el("button", { class: "btn btn-gold btn-sm", type: "button", text: "🔁 New Game" });
+    newGameBtn.addEventListener("click", startNewGame);
     banner.appendChild(el("div", { class: "winner-banner" }, [
       el("div", { class: "txt", text: "🏆 " + names + " WINS!" }),
-      el("span", { class: "hint", text: "Keep going, or reset for a new game." })
+      newGameBtn
     ]));
+  }
+
+  function startNewGame(){
+    state.players.forEach(function(p){ p.total = 0; p.flip7s = 0; });
+    state.log = [];
+    state.draft = {};
+    state.started = false;
+    openPlayerId = null;
+    renderAll();
+    document.getElementById("setupPanel").scrollIntoView({ behavior: "smooth" });
   }
 
   function renderPlayers(){
@@ -504,6 +520,7 @@
       var btn = el("button", { type: "button", class: "num-btn", "aria-pressed": active ? "true" : "false", text: String(n) });
       btn.disabled = !active && atCap;
       btn.addEventListener("click", function(){
+        buzz(10);
         d.numbers[n] = !d.numbers[n];
         renderPlayers();
       });
@@ -511,13 +528,13 @@
     });
     var luckyBtn = el("button", { type: "button", class: "num-btn lucky-btn", "aria-pressed": d.lucky13 ? "true" : "false", text: "Lucky 13" });
     luckyBtn.disabled = !d.lucky13 && atCap;
-    luckyBtn.addEventListener("click", function(){ d.lucky13 = !d.lucky13; renderPlayers(); });
+    luckyBtn.addEventListener("click", function(){ buzz(10); d.lucky13 = !d.lucky13; renderPlayers(); });
     editor.appendChild(el("div", { class: "num-rows" }, [row1, row2, luckyBtn]));
 
     editor.appendChild(el("div", { class: "editor-label", text: "Modifiers" }));
     function modBtn(labelText, active, onToggle){
       var b = el("button", { type: "button", class: "mod-btn", "aria-pressed": active ? "true" : "false", text: labelText });
-      b.addEventListener("click", onToggle);
+      b.addEventListener("click", function(){ buzz(10); onToggle(); });
       return b;
     }
     editor.appendChild(el("div", { class: "mod-row" }, [
@@ -549,6 +566,7 @@
   }
 
   function commitEntry(p, d, result){
+    buzz(25);
     var logEntry = { playerId: p.id, playerName: p.name, delta: result.score, flip7: result.flip7 };
     p.total += result.score;
     if(result.flip7) p.flip7s++;
