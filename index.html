@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flip 7: With a Vengeance — Scorekeeper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root, :root:not([data-theme="light"]) {
+    --bg: #14100E;
+    --bg-panel: #1C1613;
+    --bg-panel-2: #241B16;
+    --bg-chip: #2A201A;
+    --line: #3A2C24;
+    --line-soft: #2A211B;
+    --ink: #F2E7D8;
+    --ink-dim: #B7A793;
+    --ink-faint: #7E6E5C;
+    --blood: #B23A2E;
+    --blood-bright: #DE5142;
+    --gold: #C99A3E;
+    --gold-bright: #E7B95B;
+    --good: #7C9A6E;
+    --shadow: 0 12px 30px rgba(0,0,0,0.45);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14100E; } }
+  :root[data-theme="dark"] { --bg: #14100E; }
+
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  header.top {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: linear-gradient(180deg, var(--bg) 78%, transparent);
+    padding: 18px 20px 14px; margin: 0 -20px 22px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand h1 { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: clamp(22px, 3.4vw, 32px); margin: 0; color: var(--ink); }
+  .brand h1 em { font-style: italic; color: var(--blood-bright); }
+  .brand .tag { font-size: 12px; color: var(--ink-faint); font-family: var(--font-mono); letter-spacing: 0.03em; }
+  .top-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .pill { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-dim); background: var(--bg-panel); border: 1px solid var(--line); padding: 6px 12px; border-radius: 100px; white-space: nowrap; }
+
+  button { font-family: var(--font-body); cursor: pointer; }
+  .btn { appearance: none; border: 1px solid var(--line); background: var(--bg-panel); color: var(--ink); padding: 9px 16px; border-radius: 9px; font-size: 14px; font-weight: 600; transition: border-color .15s ease, transform .1s ease, background .15s ease; }
+  .btn:hover { border-color: var(--ink-faint); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+  .btn-ghost { background: transparent; }
+  .btn-danger { border-color: var(--blood); color: var(--blood-bright); }
+  .btn-danger:hover { background: rgba(178,58,46,0.12); }
+  .btn-gold { background: var(--gold); border-color: var(--gold); color: #1B140D; }
+  .btn-gold:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
+  .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-sm { padding: 6px 12px; font-size: 12.5px; border-radius: 7px; }
+  .icon-btn { background: var(--bg-panel); border: 1px solid var(--line); color: var(--ink-dim); width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; }
+  .icon-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  .panel { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-bottom: 22px; box-shadow: var(--shadow); }
+  .panel h2 { font-family: var(--font-display); font-size: 19px; font-weight: 600; margin: 0 0 4px; }
+  .panel .sub { color: var(--ink-faint); font-size: 13.5px; margin: 0 0 18px; }
+  .field-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12.5px; color: var(--ink-dim); font-weight: 600; }
+  .field input[type=number], .field input[type=text] { background: var(--bg-panel-2); border: 1px solid var(--line); color: var(--ink); padding: 9px 11px; border-radius: 8px; font-size: 14px; font-family: var(--font-mono); width: 110px; }
+  .switch-row { display: flex; align-items: center; gap: 10px; }
+  .switch { position: relative; width: 42px; height: 24px; flex: none; }
+  .switch input { opacity: 0; width: 100%; height: 100%; margin: 0; position: absolute; cursor: pointer; }
+  .switch .track { position: absolute; inset: 0; background: var(--bg-panel-2); border: 1px solid var(--line); border-radius: 100px; transition: background .15s ease, border-color .15s ease; }
+  .switch .knob { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: var(--ink-faint); border-radius: 50%; transition: transform .15s ease, background .15s ease; }
+  .switch input:checked + .track { background: rgba(178,58,46,0.35); border-color: var(--blood); }
+  .switch input:checked + .track + .knob { transform: translateX(18px); background: var(--blood-bright); }
+  .switch-label-text { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .switch-label-sub { font-size: 12.5px; color: var(--ink-faint); display: block; margin-top: 1px; }
+
+  .players-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .player-row-setup { display: flex; align-items: center; gap: 8px; }
+  .player-row-setup input { flex: 1; background: var(--bg-panel-2); border: 1px solid var(--line); color: var(--ink); padding: 9px 12px; border-radius: 8px; font-size: 14.5px; }
+  .player-row-setup .remove { background: none; border: none; color: var(--ink-faint); font-size: 18px; width: 30px; height: 30px; border-radius: 6px; }
+  .player-row-setup .remove:hover { color: var(--blood-bright); background: rgba(178,58,46,0.1); }
+
+  .winner-banner { background: linear-gradient(135deg, rgba(178,58,46,0.18), rgba(201,154,62,0.14)); border: 1px solid var(--gold); border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .winner-banner .txt { font-family: var(--font-display); font-style: italic; font-size: 18px; color: var(--gold-bright); }
+
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .section-head h2 { font-family: var(--font-display); font-size: 21px; font-weight: 600; margin: 0; }
+  .section-head .hint { font-size: 12.5px; color: var(--ink-faint); }
+
+  .players { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+  .player-card { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .player-card.leader { border-color: var(--gold); }
+
+  .player-summary { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; user-select: none; }
+  .player-summary .pname { font-weight: 700; font-size: 15.5px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .player-summary .ptotal { font-family: var(--font-mono); font-size: 26px; font-weight: 600; color: var(--ink); min-width: 64px; text-align: right; }
+  .player-card.leader .player-summary .ptotal { color: var(--gold-bright); }
+  .player-summary .chevron { color: var(--ink-faint); font-size: 13px; transition: transform .15s ease; flex: none; width: 18px; text-align: center; }
+  .player-card.open .chevron { transform: rotate(90deg); }
+
+  .player-editor { display: none; padding: 4px 16px 18px; border-top: 1px solid var(--line-soft); }
+  .player-card.open .player-editor { display: block; }
+
+  .editor-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); font-weight: 700; margin: 14px 0 8px; }
+  .editor-label:first-child { margin-top: 14px; }
+
+  .num-grid-scroll { overflow-x: auto; margin: 0 -2px; padding: 2px; }
+  .num-grid { display: flex; gap: 5px; min-width: max-content; }
+  .num-btn {
+    appearance: none; border: 1px solid var(--line); background: var(--bg-chip); color: var(--ink-dim);
+    font-family: var(--font-mono); font-size: 13.5px; font-weight: 600;
+    width: 34px; height: 38px; flex: none;
+    border-radius: 7px; transition: all .12s ease;
+  }
+  .num-btn:hover { border-color: var(--ink-faint); color: var(--ink); }
+  .num-btn[aria-pressed="true"] { background: var(--ink-dim); border-color: var(--ink-dim); color: #1B140D; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    appearance: none; border: 1px solid var(--line); background: var(--bg-chip); color: var(--ink-dim);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 100px; transition: all .12s ease;
+  }
+  .chip:hover { border-color: var(--ink-faint); color: var(--ink); }
+  .chip[aria-pressed="true"] { color: #1B140D; background: var(--ink-dim); border-color: var(--ink-dim); }
+  .chip.minus[aria-pressed="true"] { background: var(--blood); border-color: var(--blood); color: #fff; }
+  .chip.boost[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1B140D; }
+
+  .mod-row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .mod-btn {
+    appearance: none; border: 1px solid var(--line); background: var(--bg-chip); color: var(--ink-dim);
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    width: 34px; height: 38px; flex: none; padding: 0; border-radius: 7px; transition: all .12s ease; text-align: center;
+  }
+  .mod-btn:hover { border-color: var(--ink-faint); color: var(--ink); }
+  .mod-btn[aria-pressed="true"] { background: var(--blood); border-color: var(--blood); color: #fff; }
+  .mod-btn.boost[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1B140D; }
+
+  .lucky-btn { width: auto !important; padding: 0 12px !important; white-space: nowrap; }
+  .lucky-btn[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1B140D; }
+
+  .flip7-banner {
+    display: none; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px;
+    background: rgba(201,154,62,0.12); border: 1px dashed var(--gold); border-radius: 8px; padding: 10px 12px;
+    font-size: 13px; color: var(--gold-bright); font-weight: 600;
+  }
+  .flip7-banner.show { display: flex; }
+  .flip7-banner select { background: var(--bg-panel); border: 1px solid var(--line); color: var(--ink); padding: 5px 8px; border-radius: 6px; font-size: 12.5px; font-weight: 500; }
+
+  .editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .live-score { font-family: var(--font-mono); font-size: 13px; color: var(--ink-dim); }
+  .live-score strong { color: var(--gold-bright); font-size: 16px; }
+
+  .top-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+
+  details.log { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  details.log summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 16.5px; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+  details.log summary::-webkit-details-marker { display: none; }
+  details.log summary .arrow { color: var(--ink-faint); transition: transform .15s ease; font-family: var(--font-mono); }
+  details.log[open] summary .arrow { transform: rotate(90deg); }
+  .log-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+  .log-item { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 8px 10px; border-radius: 8px; background: var(--bg-panel-2); }
+  .log-item .lname { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .log-item .ldelta { font-family: var(--font-mono); font-weight: 600; }
+  .log-item .ldelta.pos { color: var(--good); }
+  .log-item .ldelta.neg { color: var(--blood-bright); }
+  .log-empty { color: var(--ink-faint); font-size: 13px; text-align: center; padding: 10px 0; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 560px) {
+    header.top { padding: 14px 16px 12px; margin: 0 -16px 18px; }
+    .wrap { padding: 18px 14px 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <h1>Flip 7<em>: Vengeance</em></h1>
+      <span class="tag">SCOREKEEPER</span>
+    </div>
+    <div class="top-controls" id="topControls"></div>
+  </header>
+
+  <section class="panel" id="setupPanel">
+    <h2>Start a game</h2>
+    <p class="sub">Set up your table. You can add or remove players any time before scoring starts.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="targetScore">Target score</label>
+        <input type="number" id="targetScore" value="200" min="10" step="10">
+      </div>
+      <div class="field">
+        <div class="switch-row" style="margin-top: 20px;">
+          <span class="switch">
+            <input type="checkbox" id="brutalMode">
+            <span class="track"></span>
+            <span class="knob"></span>
+          </span>
+          <span>
+            <span class="switch-label-text">Brutal Mode</span>
+            <span class="switch-label-sub">Scores can go negative · Flip 7 can steal −15</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="players-list" id="playersList"></div>
+    <button class="btn btn-ghost" id="addPlayerBtn" type="button">+ Add player</button>
+
+    <div style="margin-top: 20px; display:flex; gap: 10px;">
+      <button class="btn btn-gold" id="startGameBtn" type="button">Start game →</button>
+    </div>
+  </section>
+
+  <div id="gameArea" class="hidden">
+
+    <div id="winnerBanner"></div>
+
+    <div class="section-head">
+      <h2>Scores</h2>
+      <span class="hint">Tap a player whenever they score, in any order, as often as you like.</span>
+    </div>
+
+    <div class="players" id="playersArea"></div>
+
+    <div class="top-actions">
+      <button class="btn btn-ghost" id="undoBtn" type="button" disabled>↺ Undo last entry</button>
+      <button class="btn btn-danger" id="resetBtn" type="button">Reset game</button>
+    </div>
+
+    <details class="log">
+      <summary>Activity log <span class="arrow">›</span></summary>
+      <div class="log-list" id="logList"></div>
+    </details>
+
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "flip7vengeance-state-v3";
+  var MINUS_VALUES = [2,4,6,8,10];
+  var NUMBERS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13];
+
+  var state = null;
+  var openPlayerId = null;
+
+  function uid(){ return Math.random().toString(36).slice(2, 10); }
+
+  function defaultState(){
+    return {
+      started: false,
+      target: 200,
+      brutal: false,
+      players: [
+        { id: uid(), name: "Player 1", total: 0, flip7s: 0 },
+        { id: uid(), name: "Player 2", total: 0, flip7s: 0 },
+        { id: uid(), name: "Player 3", total: 0, flip7s: 0 }
+      ],
+      draft: {},   // per-player in-progress entry, keyed by player id
+      log: []      // flat activity log for display + undo
+    };
+  }
+
+  function freshDraft(){
+    return {
+      numbers: {},
+      lucky13: false,
+      half: false,
+      minus: { 2:false, 4:false, 6:false, 8:false, 10:false },
+      flip7Steal: false,
+      flip7Target: null
+    };
+  }
+
+  function save(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e) { console.warn("Could not save game state:", e); }
+  }
+  function load(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    } catch(e) { console.warn("Could not load saved game state:", e); }
+    return null;
+  }
+
+  state = load() || defaultState();
+
+  function ensureDrafts(){
+    state.players.forEach(function(p){
+      if(!state.draft[p.id]) state.draft[p.id] = freshDraft();
+    });
+    Object.keys(state.draft).forEach(function(id){
+      if(!state.players.some(function(p){ return p.id === id; })) delete state.draft[id];
+    });
+  }
+
+  function numberKeys(d){
+    return Object.keys(d.numbers).filter(function(k){ return d.numbers[k]; });
+  }
+
+  function computeScore(d){
+    var keys = numberKeys(d);
+    var sum = keys.reduce(function(s,k){ return s + Number(k); }, 0);
+    var cardCount = keys.length;
+    if(d.lucky13){
+      sum += 13;
+      cardCount += 1;
+    }
+    if(d.half) sum = Math.floor(sum / 2);
+    MINUS_VALUES.forEach(function(v){ if(d.minus[v]) sum -= v; });
+    if(!state.brutal) sum = Math.max(0, sum);
+    var flip7 = cardCount >= 7;
+    if(flip7 && !(state.brutal && d.flip7Steal)) sum += 15;
+    return { score: sum, flip7: flip7, cardCount: cardCount };
+  }
+
+  // ---------- DOM helpers ----------
+  function el(tag, attrs, children){
+    var e = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function(k){
+      if(k === "class") e.className = attrs[k];
+      else if(k === "html") e.innerHTML = attrs[k];
+      else if(k === "text") e.textContent = attrs[k];
+      else if(k.indexOf("on") === 0 && typeof attrs[k] === "function") e.addEventListener(k.slice(2), attrs[k]);
+      else e.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function(c){ if(c) e.appendChild(c); });
+    return e;
+  }
+
+  function renderTopControls(){
+    var c = document.getElementById("topControls");
+    c.innerHTML = "";
+    if(state.started){
+      c.appendChild(el("span", { class: "pill" }, [document.createTextNode("Target " + state.target)]));
+      if(state.brutal) c.appendChild(el("span", { class: "pill" }, [document.createTextNode("🔪 Brutal Mode")]));
+      c.appendChild(el("button", { class: "icon-btn", title: "Edit players / settings", onclick: openSetup, type: "button", text: "⚙" }));
+    }
+  }
+
+  function openSetup(){
+    document.getElementById("setupPanel").classList.remove("hidden");
+    renderSetupForm();
+    document.getElementById("setupPanel").scrollIntoView({ behavior: "smooth" });
+  }
+
+  function renderSetupForm(){
+    document.getElementById("targetScore").value = state.target;
+    document.getElementById("brutalMode").checked = state.brutal;
+    var list = document.getElementById("playersList");
+    list.innerHTML = "";
+    state.players.forEach(function(p, idx){
+      var input = el("input", { type: "text", value: p.name, placeholder: "Player name" });
+      input.addEventListener("input", function(){ p.name = input.value; });
+      var removeBtn = el("button", { class: "remove", type: "button", title: "Remove player", text: "✕" });
+      removeBtn.addEventListener("click", function(){
+        if(state.players.length <= 2) return;
+        state.players.splice(idx, 1);
+        renderSetupForm();
+      });
+      list.appendChild(el("div", { class: "player-row-setup" }, [input, state.players.length > 2 ? removeBtn : null]));
+    });
+  }
+
+  function renderWinnerBanner(){
+    var banner = document.getElementById("winnerBanner");
+    banner.innerHTML = "";
+    var maxTotal = Math.max.apply(null, state.players.map(function(p){ return p.total; }));
+    if(maxTotal < state.target) return;
+    var winners = state.players.filter(function(p){ return p.total === maxTotal; });
+    var names = winners.map(function(p){ return p.name; }).join(" & ");
+    banner.appendChild(el("div", { class: "winner-banner" }, [
+      el("div", { class: "txt", text: "🏆 " + names + " reached " + state.target + " and leads the game." }),
+      el("span", { class: "hint", text: "Keep going, or reset for a new game." })
+    ]));
+  }
+
+  function chip(labelText, active, cls, onToggle){
+    var b = el("button", { type: "button", class: "chip" + (cls ? " " + cls : ""), "aria-pressed": active ? "true" : "false", text: labelText });
+    b.addEventListener("click", onToggle);
+    return b;
+  }
+
+  function renderPlayers(){
+    var area = document.getElementById("playersArea");
+    area.innerHTML = "";
+    ensureDrafts();
+    var maxTotal = Math.max.apply(null, state.players.map(function(p){ return p.total; }));
+
+    state.players.forEach(function(p){
+      var d = state.draft[p.id];
+      var isOpen = openPlayerId === p.id;
+      var isLeader = p.total === maxTotal && maxTotal > 0;
+
+      var card = el("div", { class: "player-card" + (isOpen ? " open" : "") + (isLeader ? " leader" : "") });
+
+      var summary = el("div", { class: "player-summary" }, [
+        el("span", { class: "pname", text: p.name }),
+        el("span", { class: "ptotal", text: String(p.total) }),
+        el("span", { class: "chevron", text: "›" })
+      ]);
+      summary.addEventListener("click", function(){
+        openPlayerId = isOpen ? null : p.id;
+        renderPlayers();
+      });
+      card.appendChild(summary);
+
+      var editor = el("div", { class: "player-editor" });
+      if(isOpen) buildEditor(editor, p, d);
+      card.appendChild(editor);
+
+      area.appendChild(card);
+    });
+  }
+
+  function buildEditor(editor, p, d){
+    editor.appendChild(el("div", { class: "editor-label", text: "Which number cards does " + p.name + " have?" }));
+
+    var grid = el("div", { class: "num-grid" });
+    NUMBERS.forEach(function(n){
+      var active = !!d.numbers[n];
+      var btn = el("button", { type: "button", class: "num-btn", "aria-pressed": active ? "true" : "false", text: String(n) });
+      btn.addEventListener("click", function(){
+        d.numbers[n] = !d.numbers[n];
+        renderPlayers();
+      });
+      grid.appendChild(btn);
+    });
+    var luckyBtn = el("button", { type: "button", class: "num-btn lucky-btn", "aria-pressed": d.lucky13 ? "true" : "false", text: "Lucky 13" });
+    luckyBtn.addEventListener("click", function(){ d.lucky13 = !d.lucky13; renderPlayers(); });
+    grid.appendChild(luckyBtn);
+    editor.appendChild(el("div", { class: "num-grid-scroll" }, [grid]));
+
+    editor.appendChild(el("div", { class: "editor-label", text: "Modifiers" }));
+    function modBtn(labelText, active, cls, onToggle){
+      var b = el("button", { type: "button", class: "mod-btn" + (cls ? " " + cls : ""), "aria-pressed": active ? "true" : "false", text: labelText });
+      b.addEventListener("click", onToggle);
+      return b;
+    }
+    editor.appendChild(el("div", { class: "mod-row" }, [
+      modBtn("÷2", d.half, "boost", function(){ d.half = !d.half; renderPlayers(); }),
+      modBtn("−2", d.minus[2], "", function(){ d.minus[2] = !d.minus[2]; renderPlayers(); }),
+      modBtn("−4", d.minus[4], "", function(){ d.minus[4] = !d.minus[4]; renderPlayers(); }),
+      modBtn("−6", d.minus[6], "", function(){ d.minus[6] = !d.minus[6]; renderPlayers(); }),
+      modBtn("−8", d.minus[8], "", function(){ d.minus[8] = !d.minus[8]; renderPlayers(); }),
+      modBtn("−10", d.minus[10], "", function(){ d.minus[10] = !d.minus[10]; renderPlayers(); })
+    ]));
+
+    var result = computeScore(d);
+
+    var flip7Banner = el("div", { class: "flip7-banner" + (result.flip7 ? " show" : "") });
+    if(result.flip7){
+      flip7Banner.appendChild(document.createTextNode("🃏 Flip 7! (" + result.cardCount + " cards)"));
+      if(state.brutal){
+        var keepBtn = chip("Keep +15", !d.flip7Steal, "boost", function(){ d.flip7Steal = false; d.flip7Target = null; renderPlayers(); });
+        var stealBtn = chip("Take −15 from…", d.flip7Steal, "minus", function(){ d.flip7Steal = true; renderPlayers(); });
+        flip7Banner.appendChild(keepBtn);
+        flip7Banner.appendChild(stealBtn);
+        if(d.flip7Steal){
+          var select = el("select", {});
+          select.appendChild(el("option", { value: "", text: "Choose player…" }));
+          state.players.forEach(function(other){
+            if(other.id === p.id) return;
+            var opt = el("option", { value: other.id, text: other.name });
+            if(d.flip7Target === other.id) opt.selected = true;
+            select.appendChild(opt);
+          });
+          select.addEventListener("change", function(){ d.flip7Target = select.value || null; });
+          flip7Banner.appendChild(select);
+        }
+      } else {
+        flip7Banner.appendChild(document.createTextNode("+15 bonus applied automatically"));
+      }
+    }
+    editor.appendChild(flip7Banner);
+
+    var footer = el("div", { class: "editor-footer" });
+    footer.appendChild(el("div", { class: "live-score" }, [
+      document.createTextNode("Adding: "),
+      el("strong", { text: (result.score >= 0 ? "+" : "") + result.score })
+    ]));
+    var actions = el("div", {});
+    var addBtn = el("button", { class: "btn btn-gold btn-sm", type: "button", text: "Add to score" });
+    addBtn.disabled = numberKeys(d).length === 0 && !d.lucky13;
+    addBtn.addEventListener("click", function(){ commitEntry(p, d, result); });
+    actions.appendChild(addBtn);
+    footer.appendChild(actions);
+    editor.appendChild(footer);
+  }
+
+  function commitEntry(p, d, result){
+    var logEntry = { playerId: p.id, playerName: p.name, delta: result.score, flip7: result.flip7 };
+    p.total += result.score;
+    if(result.flip7) p.flip7s++;
+
+    if(state.brutal && result.flip7 && d.flip7Steal && d.flip7Target){
+      var target = state.players.filter(function(pp){ return pp.id === d.flip7Target; })[0];
+      if(target){
+        target.total -= 15;
+        logEntry.targetId = target.id;
+        logEntry.targetName = target.name;
+        logEntry.targetDelta = -15;
+      }
+    }
+
+    state.log.push(logEntry);
+    state.draft[p.id] = freshDraft();
+    openPlayerId = null;
+    renderAll();
+  }
+
+  function renderLog(){
+    var list = document.getElementById("logList");
+    list.innerHTML = "";
+    if(state.log.length === 0){
+      list.appendChild(el("div", { class: "log-empty", text: "No scores added yet." }));
+      return;
+    }
+    for(var i = state.log.length - 1; i >= 0; i--){
+      var entry = state.log[i];
+      var deltaClass = entry.delta > 0 ? "pos" : (entry.delta < 0 ? "neg" : "");
+      var label = entry.playerName + (entry.flip7 ? " 🃏" : "");
+      var item = el("div", { class: "log-item" }, [
+        el("span", { class: "lname", text: label }),
+        el("span", { class: "ldelta " + deltaClass, text: (entry.delta >= 0 ? "+" : "") + entry.delta })
+      ]);
+      list.appendChild(item);
+      if(entry.targetId){
+        var tItem = el("div", { class: "log-item" }, [
+          el("span", { class: "lname", text: entry.targetName + " (stolen from)" }),
+          el("span", { class: "ldelta neg", text: String(entry.targetDelta) })
+        ]);
+        list.appendChild(tItem);
+      }
+    }
+  }
+
+  function renderAll(){
+    renderTopControls();
+    if(state.started){
+      document.getElementById("setupPanel").classList.add("hidden");
+      document.getElementById("gameArea").classList.remove("hidden");
+      renderWinnerBanner();
+      renderPlayers();
+      renderLog();
+      document.getElementById("undoBtn").disabled = state.log.length === 0;
+    } else {
+      document.getElementById("setupPanel").classList.remove("hidden");
+      document.getElementById("gameArea").classList.add("hidden");
+      renderSetupForm();
+    }
+    save();
+  }
+
+  // ---------- Actions ----------
+  document.getElementById("addPlayerBtn").addEventListener("click", function(){
+    if(state.players.length >= 25) return;
+    state.players.push({ id: uid(), name: "Player " + (state.players.length + 1), total: 0, flip7s: 0 });
+    renderSetupForm();
+  });
+
+  document.getElementById("startGameBtn").addEventListener("click", function(){
+    state.target = Number(document.getElementById("targetScore").value) || 200;
+    state.brutal = document.getElementById("brutalMode").checked;
+    state.players.forEach(function(p){ if(!p.name.trim()) p.name = "Player"; });
+    state.started = true;
+    ensureDrafts();
+    renderAll();
+  });
+
+  document.getElementById("undoBtn").addEventListener("click", function(){
+    var entry = state.log.pop();
+    if(!entry) return;
+    var player = state.players.filter(function(p){ return p.id === entry.playerId; })[0];
+    if(player){
+      player.total -= entry.delta;
+      if(entry.flip7) player.flip7s = Math.max(0, player.flip7s - 1);
+    }
+    if(entry.targetId){
+      var target = state.players.filter(function(p){ return p.id === entry.targetId; })[0];
+      if(target) target.total -= entry.targetDelta;
+    }
+    renderAll();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    if(!window.confirm("Reset the whole game? This clears all scores and the activity log.")) return;
+    state = defaultState();
+    openPlayerId = null;
+    renderAll();
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
