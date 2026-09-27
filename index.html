@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Flip 7: With a Vengeance — Scorekeeper</title>
+<title>What's the Score? — Scorekeeper</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -53,9 +53,13 @@
     position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
     background: var(--bg);
     padding: 14px 14px 10px; margin: 0 -14px 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px;
     border-bottom: 3px solid var(--ink);
   }
+  .header-left { display: flex; align-items: center; min-width: 0; justify-self: start; }
+  .header-center { display: flex; align-items: center; justify-content: center; justify-self: center; }
+  .header-right { display: flex; align-items: center; justify-content: flex-end; justify-self: end; }
+
   .brand { display: flex; align-items: center; gap: 8px; transform: rotate(-1.5deg); }
   .brand h1 {
     font-family: var(--font-display);
@@ -68,8 +72,16 @@
     line-height: 1;
   }
   .brand h1 .v { color: var(--ink); -webkit-text-stroke: 0; text-shadow: none; font-size: 0.62em; display: block; margin-top: -2px; letter-spacing: 1px; }
-  .top-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
+  .game-name-brand {
+    display: flex; align-items: center; gap: 7px; min-width: 0;
+    font-family: var(--font-display); font-size: clamp(17px, 5.5vw, 22px);
+    color: var(--ink); letter-spacing: 0.3px; transform: rotate(-1deg);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .game-name-brand .icon { font-size: 1.15em; flex: none; }
+
+  .settings-list { display: flex; flex-direction: column; gap: 10px; }
   .pill {
     font-family: var(--font-body); font-weight: 700; font-size: 12px;
     color: var(--ink); background: var(--paper);
@@ -101,9 +113,10 @@
   }
   .icon-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--shadow-col); }
 
-  /* ---------- Setup panel ---------- */
+  /* ---------- Panels (Players / Game Picker / Game Setup) ---------- */
   .panel { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 18px; margin-bottom: 20px; box-shadow: 5px 5px 0 var(--shadow-col); }
   .panel h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 12px; letter-spacing: 0.3px; color: var(--ink); }
+  .panel .sub { color: var(--ink-soft); font-size: 13px; margin: -6px 0 14px; font-weight: 500; }
   .field-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field-inline { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; gap: 12px; }
@@ -116,7 +129,7 @@
   .players-list-head { margin-bottom: 6px; }
   .players-list-head label { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
   .btn-add { background: var(--green); color: #fff; border-color: var(--ink); }
-  .start-row { margin-top: 18px; display: flex; justify-content: flex-end; }
+  .start-row { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; }
 
   .players-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
   .player-row-setup { display: flex; align-items: center; gap: 8px; }
@@ -138,6 +151,21 @@
   .player-row-setup .remove:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--shadow-col); }
   .icon-btn-wide { width: 100%; height: 40px; font-size: 20px; font-weight: 700; border-radius: 10px; }
 
+  .game-choice-list { display: flex; flex-direction: column; gap: 10px; }
+  .game-choice {
+    display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+    background: var(--paper-tint); border: 2.5px solid var(--ink); border-radius: 14px;
+    padding: 12px 14px; box-shadow: 3px 3px 0 var(--shadow-col);
+    font-family: var(--font-body); cursor: pointer;
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .game-choice:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow-col); }
+  .game-choice-icon { font-size: 28px; flex: none; }
+  .game-choice-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .game-choice-name { font-family: var(--font-display); font-size: 18px; color: var(--ink); letter-spacing: 0.3px; }
+  .game-choice-tag { font-size: 12px; color: var(--ink-soft); font-weight: 500; }
+  .game-choice-status { font-size: 11px; color: var(--green-dark); font-weight: 700; white-space: nowrap; }
+
   /* ---------- Winner banner ---------- */
   .winner-banner {
     background: repeating-linear-gradient(45deg, var(--gold), var(--gold) 12px, #FFDB70 12px, #FFDB70 24px);
@@ -147,13 +175,12 @@
     display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
   }
   .winner-banner .txt { font-family: var(--font-display); font-size: 19px; color: var(--ink); letter-spacing: 0.3px; }
-  .winner-banner .hint { font-size: 12px; color: var(--ink); font-weight: 600; }
 
   .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
   .section-head h2 { font-family: var(--font-display); font-size: 22px; margin: 0; color: var(--ink); letter-spacing: 0.3px; }
   .section-head .hint { font-size: 12px; color: var(--ink-soft); font-weight: 500; }
 
-  /* ---------- Player list ---------- */
+  /* ---------- Player list (scores) ---------- */
   .players { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
   .player-card {
     background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; overflow: hidden;
@@ -201,18 +228,26 @@
 
   .lucky-btn { width: 100%; white-space: nowrap; font-size: 14px; }
 
-  .editor-label-row { display: flex; align-items: baseline; justify-content: space-between; }
+  .freeform-input {
+    width: 100%; height: 56px; text-align: center;
+    background: var(--paper); border: 2.5px solid var(--ink); color: var(--ink);
+    font-family: var(--font-body); font-size: 28px; font-weight: 700;
+    border-radius: 12px; box-shadow: 2px 2px 0 var(--shadow-col);
+  }
 
   .mod-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .mod-btn {
-    appearance: none; border: 2.5px solid var(--red-dark); background: #FDE7E6; color: var(--red-dark);
+    appearance: none; border: 2.5px solid var(--ink); background: var(--paper); color: var(--ink);
     font-family: var(--font-body); font-size: 13.5px; font-weight: 700;
     width: 38px; height: 42px; flex: none; padding: 0; border-radius: 10px; text-align: center;
     box-shadow: 2px 2px 0 var(--shadow-col);
     transition: transform .08s ease, box-shadow .08s ease, background .1s ease;
   }
   .mod-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--shadow-col); }
-  .mod-btn[aria-pressed="true"] { background: var(--red); border-color: var(--ink); color: #fff; box-shadow: 1px 1px 0 var(--shadow-col); transform: translate(1px,1px); }
+  .mod-row-penalty .mod-btn { border-color: var(--red-dark); background: #FDE7E6; color: var(--red-dark); }
+  .mod-row-penalty .mod-btn[aria-pressed="true"] { background: var(--red); border-color: var(--ink); color: #fff; box-shadow: 1px 1px 0 var(--shadow-col); transform: translate(1px,1px); }
+  .mod-row-bonus .mod-btn { border-color: var(--green-dark); background: #E3F9EC; color: var(--green-dark); }
+  .mod-row-bonus .mod-btn[aria-pressed="true"] { background: var(--green); border-color: var(--ink); color: #fff; box-shadow: 1px 1px 0 var(--shadow-col); transform: translate(1px,1px); }
   .mod-spacer { display: inline-block; width: 38px; height: 42px; flex: none; }
 
   .flip7-banner {
@@ -223,10 +258,6 @@
   }
   .flip7-banner.show { display: flex; }
   .flip7-banner .f7txt { font-family: var(--font-display); font-size: 17px; color: var(--ink); letter-spacing: 0.3px; }
-  .flip7-banner select {
-    background: var(--paper); border: 2.5px solid var(--ink); color: var(--ink);
-    padding: 6px 8px; border-radius: 8px; font-size: 12.5px; font-weight: 600; font-family: var(--font-body);
-  }
 
   .editor-footer { margin-top: 18px; }
   .btn-block { width: 100%; font-size: 14.5px; padding: 12px 16px; }
@@ -245,46 +276,68 @@
 <div class="wrap">
 
   <header class="top">
-    <div class="brand">
-      <h1>FLIP 7<span class="v">VENGEANCE</span></h1>
+    <div class="header-left" id="headerLeft">
+      <div class="brand">
+        <h1>WHAT'S<span class="v">THE SCORE?</span></h1>
+      </div>
     </div>
-    <div class="top-controls" id="topControls"></div>
+    <div class="header-center" id="headerCenter"></div>
+    <div class="header-right" id="headerRight"></div>
   </header>
 
-  <section class="panel" id="setupPanel">
-    <h2>New Game</h2>
+  <!-- Step 1: shared player roster -->
+  <section class="panel hidden" id="playersPanel">
+    <h2>Players</h2>
 
+    <div class="players-list" id="playersList"></div>
+    <button class="icon-btn icon-btn-wide btn-add" id="addPlayerBtn" type="button" title="Add player" aria-label="Add player">+</button>
+
+    <div class="start-row">
+      <button class="btn btn-gold" id="continuePlayersBtn" type="button">▶ Continue</button>
+    </div>
+  </section>
+
+  <!-- Step 2: choose which game to score -->
+  <section class="panel hidden" id="gamePicker">
+    <h2>Choose a Game</h2>
+    <div class="game-choice-list" id="gameChoiceList"></div>
+  </section>
+
+  <!-- Step 3: per-game target score (first time only) -->
+  <section class="panel hidden" id="gameSetupPanel">
+    <h2 id="gameSetupTitle">New Game</h2>
     <div class="field-row">
       <div class="field field-inline">
         <label for="targetScore">🎯 Target score</label>
         <input type="number" id="targetScore" value="200" min="10" step="10">
       </div>
     </div>
-
-    <div class="players-list-head">
-      <label>Players</label>
-    </div>
-    <div class="players-list" id="playersList"></div>
-    <button class="icon-btn icon-btn-wide btn-add" id="addPlayerBtn" type="button" title="Add player" aria-label="Add player">+</button>
-
     <div class="start-row">
       <button class="btn btn-gold" id="startGameBtn" type="button">▶ Start Game</button>
     </div>
   </section>
 
+  <!-- Settings: entry point for editing players or switching games -->
+  <section class="panel hidden" id="settingsPanel">
+    <h2>Settings</h2>
+    <div class="settings-list">
+      <button class="btn btn-gold btn-block" id="settingsReturnBtn" type="button">▶ Return to Game</button>
+      <button class="btn btn-ghost btn-block" id="settingsEditPlayersBtn" type="button">👥 Edit Players</button>
+      <button class="btn btn-ghost btn-block" id="settingsSwitchGameBtn" type="button">🔀 Switch Game</button>
+      <button class="btn btn-danger btn-block" id="settingsResetAllBtn" type="button">🗑 Reset All Games</button>
+    </div>
+  </section>
+
+  <!-- Step 4: scores -->
   <div id="gameArea" class="hidden">
 
     <div id="winnerBanner"></div>
-
-    <div class="section-head">
-      <h2>Scores</h2>
-    </div>
 
     <div class="players" id="playersArea"></div>
 
     <div class="top-actions">
       <button class="btn btn-ghost btn-sm" id="undoBtn" type="button" disabled>↺ Undo</button>
-      <button class="btn btn-danger btn-sm" id="resetBtn" type="button">Reset</button>
+      <button class="btn btn-danger btn-sm" id="resetBtn" type="button">Reset Scores</button>
     </div>
 
   </div>
@@ -295,12 +348,57 @@
 (function(){
   "use strict";
 
-  var STORAGE_KEY = "flip7vengeance-state-v4";
+  var ROSTER_KEY = "wts-roster-v1";
+  var GAME_STATE_PREFIX = "wts-game-";
+  var ACTIVE_GAME_KEY = "wts-active-game";
+
   var MINUS_VALUES = [2,4,6,8,10];
-  var NUMBERS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13];
+  var PLUS_VALUES = [2,4,6,8,10];
   var PLAYER_COLORS = ["#2F6FED", "#A855F7", "#FB923C", "#14B8A6", "#EC4899", "#6366F1", "#06B6D4"];
 
-  var state = null;
+  // ---------- Game definitions (isolated per-game rules; shared scoring engine below) ----------
+  var GAMES = {
+    vengeance: {
+      id: "vengeance",
+      title: "FLIP 7",
+      subtitle: "VENGEANCE",
+      tagline: "More cards. Nastier modifiers.",
+      icon: "🃏",
+      editorType: "cardgrid",
+      numbers: [0,1,2,3,4,5,6,7,8,9,10,11,12,13],
+      hasLucky13: true,
+      modifierTheme: "penalty",
+      defaultTarget: 200
+    },
+    original: {
+      id: "original",
+      title: "FLIP 7",
+      subtitle: "CLASSIC",
+      tagline: "The original.",
+      icon: "🎴",
+      editorType: "cardgrid",
+      numbers: [0,1,2,3,4,5,6,7,8,9,10,11,12],
+      hasLucky13: false,
+      modifierTheme: "bonus",
+      defaultTarget: 200
+    },
+    cabanga: {
+      id: "cabanga",
+      title: "CABANGA!",
+      subtitle: "",
+      tagline: "Fewest points wins.",
+      icon: "📣",
+      editorType: "freeform",
+      lowerWins: true,
+      defaultTarget: 18
+    }
+  };
+
+  function gameLabel(g){ return g.subtitle ? (g.title + ": " + g.subtitle) : g.title; }
+
+  var roster = null;          // { players: [{id,name,defaultName,color}] }
+  var currentGameId = null;
+  var gameState = null;       // { target, started, log, stats:{playerId:{total,flip7s}}, draft:{} }
   var openPlayerId = null;
 
   function uid(){ return Math.random().toString(36).slice(2, 10); }
@@ -310,18 +408,56 @@
     catch(e) { /* no-op if unsupported */ }
   }
 
-  function defaultState(){
+  // ---------- Roster (shared players) ----------
+  function defaultRoster(){
     return {
-      started: false,
-      target: 200,
       players: [
-        { id: uid(), name: "Player 1", defaultName: "Player 1", total: 0, flip7s: 0, color: colorFor(0) },
-        { id: uid(), name: "Player 2", defaultName: "Player 2", total: 0, flip7s: 0, color: colorFor(1) },
-        { id: uid(), name: "Player 3", defaultName: "Player 3", total: 0, flip7s: 0, color: colorFor(2) }
-      ],
-      draft: {},
-      log: []
+        { id: uid(), name: "Player 1", defaultName: "Player 1", color: colorFor(0) },
+        { id: uid(), name: "Player 2", defaultName: "Player 2", color: colorFor(1) },
+        { id: uid(), name: "Player 3", defaultName: "Player 3", color: colorFor(2) }
+      ]
     };
+  }
+  function saveRoster(){
+    try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); }
+    catch(e) { console.warn("Could not save roster:", e); }
+  }
+  function loadRoster(){
+    try {
+      var raw = localStorage.getItem(ROSTER_KEY);
+      if(raw) return JSON.parse(raw);
+    } catch(e) { console.warn("Could not load roster:", e); }
+    return null;
+  }
+
+  // ---------- Per-game state ----------
+  function defaultGameState(gameId){
+    var game = GAMES[gameId];
+    return { target: (game && game.defaultTarget) || 200, started: false, log: [], stats: {}, draft: {} };
+  }
+  function gameStorageKey(gameId){ return GAME_STATE_PREFIX + gameId + "-v1"; }
+  function saveGameState(){
+    if(!currentGameId) return;
+    try { localStorage.setItem(gameStorageKey(currentGameId), JSON.stringify(gameState)); }
+    catch(e) { console.warn("Could not save game state:", e); }
+  }
+  function loadGameState(gameId){
+    try {
+      var raw = localStorage.getItem(gameStorageKey(gameId));
+      if(raw) return JSON.parse(raw);
+    } catch(e) { console.warn("Could not load game state:", e); }
+    return null;
+  }
+
+  function ensureStats(playerId){
+    if(!gameState.stats[playerId]) gameState.stats[playerId] = { total: 0, flip7s: 0 };
+    return gameState.stats[playerId];
+  }
+  function ensureDrafts(){
+    roster.players.forEach(function(p){
+      if(!gameState.draft[p.id]) gameState.draft[p.id] = freshDraft();
+      ensureStats(p.id);
+    });
   }
 
   function freshDraft(){
@@ -329,34 +465,18 @@
       numbers: {},
       lucky13: false,
       half: false,
-      minus: { 2:false, 4:false, 6:false, 8:false, 10:false }
+      minus: { 2:false, 4:false, 6:false, 8:false, 10:false },
+      x2: false,
+      plus: { 2:false, 4:false, 6:false, 8:false, 10:false },
+      value: ""
     };
   }
 
-  function save(){
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    catch(e) { console.warn("Could not save game state:", e); }
-  }
-  function load(){
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if(raw) return JSON.parse(raw);
-    } catch(e) { console.warn("Could not load saved game state:", e); }
-    return null;
-  }
-
-  state = load() || defaultState();
-  state.players.forEach(function(p, i){
-    if(!p.color) p.color = colorFor(i);
-    if(!p.defaultName) p.defaultName = p.name || ("Player " + (i + 1));
-  });
-
-  function ensureDrafts(){
-    state.players.forEach(function(p){
-      if(!state.draft[p.id]) state.draft[p.id] = freshDraft();
-    });
-    Object.keys(state.draft).forEach(function(id){
-      if(!state.players.some(function(p){ return p.id === id; })) delete state.draft[id];
+  // Merge roster (identity) with this game's stats (numbers) for rendering.
+  function mergedPlayers(){
+    return roster.players.map(function(p){
+      var st = gameState.stats[p.id] || { total: 0, flip7s: 0 };
+      return { id: p.id, name: p.name, color: p.color, total: st.total, flip7s: st.flip7s };
     });
   }
 
@@ -364,19 +484,35 @@
     return Object.keys(d.numbers).filter(function(k){ return d.numbers[k]; });
   }
 
-  function computeScore(d){
+  // ---------- Shared scoring engine (used by "cardgrid" games, parameterized by config) ----------
+  function computeScore(d, game){
     var keys = numberKeys(d);
     var sum = keys.reduce(function(s,k){ return s + Number(k); }, 0);
     var cardCount = keys.length;
-    if(d.lucky13){
+    if(game.hasLucky13 && d.lucky13){
       sum += 13;
       cardCount += 1;
     }
-    if(d.half) sum = Math.floor(sum / 2);
-    MINUS_VALUES.forEach(function(v){ if(d.minus[v]) sum -= v; });
+    if(game.modifierTheme === "penalty"){
+      if(d.half) sum = Math.floor(sum / 2);
+      MINUS_VALUES.forEach(function(v){ if(d.minus[v]) sum -= v; });
+    } else {
+      if(d.x2) sum = sum * 2;
+      PLUS_VALUES.forEach(function(v){ if(d.plus[v]) sum += v; });
+    }
     var flip7 = cardCount >= 7;
     if(flip7) sum += 15;
     return { score: sum, flip7: flip7, cardCount: cardCount };
+  }
+
+  // Dispatches to the right scoring shape for the active game's editor type.
+  function getRoundScore(d, game){
+    if(game.editorType === "freeform"){
+      var v = Number(d.value);
+      if(!isFinite(v)) v = 0;
+      return { score: v, flip7: false, cardCount: 0 };
+    }
+    return computeScore(d, game);
   }
 
   // ---------- DOM helpers ----------
@@ -394,26 +530,25 @@
     return e;
   }
 
-  function renderTopControls(){
-    var c = document.getElementById("topControls");
-    c.innerHTML = "";
-    if(state.started){
-      c.appendChild(el("span", { class: "pill" }, [document.createTextNode("🎯 " + state.target)]));
-      c.appendChild(el("button", { class: "icon-btn", title: "Edit players / settings", onclick: openSetup, type: "button", text: "⚙" }));
-    }
+  function panel(id){ return document.getElementById(id); }
+  function hideAllPanels(){
+    ["playersPanel", "gamePicker", "gameSetupPanel", "settingsPanel", "gameArea"].forEach(function(id){
+      panel(id).classList.add("hidden");
+    });
   }
 
-  function openSetup(){
-    document.getElementById("setupPanel").classList.remove("hidden");
-    renderSetupForm();
-    document.getElementById("setupPanel").scrollIntoView({ behavior: "smooth" });
+  // ---------- Screen: Players (roster editor) ----------
+  function showPlayersPanel(){
+    hideAllPanels();
+    panel("playersPanel").classList.remove("hidden");
+    renderPlayersPanel();
+    renderTopControls();
   }
 
-  function renderSetupForm(){
-    document.getElementById("targetScore").value = state.target;
+  function renderPlayersPanel(){
     var list = document.getElementById("playersList");
     list.innerHTML = "";
-    state.players.forEach(function(p, idx){
+    roster.players.forEach(function(p, idx){
       var avatar = el("span", { class: "avatar-setup", style: "background:" + p.color + "33; border-color:" + p.color + ";", text: (p.name.trim()[0] || "?").toUpperCase() });
       var input = el("input", { type: "text", value: (p.name === p.defaultName ? "" : p.name), placeholder: p.defaultName });
       input.addEventListener("input", function(){
@@ -422,39 +557,195 @@
       });
       var removeBtn = el("button", { class: "remove", type: "button", title: "Remove player", "aria-label": "Remove player", text: "🗑" });
       removeBtn.addEventListener("click", function(){
-        if(state.players.length <= 2) return;
-        state.players.splice(idx, 1);
-        renderSetupForm();
+        if(roster.players.length <= 2) return;
+        roster.players.splice(idx, 1);
+        renderPlayersPanel();
       });
-      list.appendChild(el("div", { class: "player-row-setup" }, [avatar, input, state.players.length > 2 ? removeBtn : null]));
+      list.appendChild(el("div", { class: "player-row-setup" }, [avatar, input, roster.players.length > 2 ? removeBtn : null]));
+    });
+
+    var continueBtn = document.getElementById("continuePlayersBtn");
+    var backToScores = !!(currentGameId && gameState && gameState.started);
+    continueBtn.textContent = backToScores ? "✓ Done" : "▶ Continue";
+  }
+
+  document.getElementById("addPlayerBtn").addEventListener("click", function(){
+    if(roster.players.length >= 25) return;
+    var newName = "Player " + (roster.players.length + 1);
+    roster.players.push({ id: uid(), name: newName, defaultName: newName, color: colorFor(roster.players.length) });
+    renderPlayersPanel();
+  });
+
+  document.getElementById("continuePlayersBtn").addEventListener("click", function(){
+    saveRoster();
+    if(currentGameId && gameState && gameState.started){
+      renderAll();
+    } else {
+      showGamePicker();
+    }
+  });
+
+  // ---------- Screen: Settings (entry point for Edit Players / Switch Game) ----------
+  function showSettingsPanel(){
+    hideAllPanels();
+    panel("settingsPanel").classList.remove("hidden");
+    renderTopControls();
+  }
+
+  function returnToGame(){
+    if(gameState && gameState.started){
+      renderAll();
+    } else {
+      showGameSetup();
+    }
+  }
+
+  function toggleSettingsPanel(){
+    if(panel("settingsPanel").classList.contains("hidden")){
+      showSettingsPanel();
+    } else {
+      returnToGame();
+    }
+  }
+
+  function resetAllGames(){
+    if(!window.confirm("Reset all games? This clears every game's scores and progress.")) return;
+    Object.keys(GAMES).forEach(function(id){
+      try { localStorage.removeItem(gameStorageKey(id)); } catch(e) { /* no-op */ }
+    });
+    try { localStorage.removeItem(ACTIVE_GAME_KEY); } catch(e) { /* no-op */ }
+    currentGameId = null;
+    gameState = null;
+    openPlayerId = null;
+    showGamePicker();
+  }
+
+  document.getElementById("settingsReturnBtn").addEventListener("click", returnToGame);
+  document.getElementById("settingsEditPlayersBtn").addEventListener("click", showPlayersPanel);
+  document.getElementById("settingsSwitchGameBtn").addEventListener("click", showGamePicker);
+  document.getElementById("settingsResetAllBtn").addEventListener("click", resetAllGames);
+
+  // ---------- Screen: Game Picker ----------
+  function showGamePicker(){
+    hideAllPanels();
+    panel("gamePicker").classList.remove("hidden");
+    renderGamePicker();
+    renderTopControls();
+  }
+
+  function renderGamePicker(){
+    var list = document.getElementById("gameChoiceList");
+    list.innerHTML = "";
+    Object.keys(GAMES).forEach(function(id){
+      var g = GAMES[id];
+      var existing = loadGameState(id);
+      var body = [
+        el("span", { class: "game-choice-name", text: gameLabel(g) }),
+        el("span", { class: "game-choice-tag", text: g.tagline })
+      ];
+      if(existing && existing.started) body.push(el("span", { class: "game-choice-status", text: "● In progress" }));
+      var card = el("button", { type: "button", class: "game-choice" }, [
+        el("span", { class: "game-choice-icon", text: g.icon }),
+        el("span", { class: "game-choice-body" }, body)
+      ]);
+      card.addEventListener("click", function(){ chooseGame(id); });
+      list.appendChild(card);
     });
   }
 
+  function chooseGame(gameId){
+    currentGameId = gameId;
+    try { localStorage.setItem(ACTIVE_GAME_KEY, gameId); } catch(e) { /* no-op */ }
+    gameState = loadGameState(gameId) || defaultGameState(gameId);
+    ensureDrafts();
+    openPlayerId = null;
+    if(gameState.started){
+      renderAll();
+    } else {
+      showGameSetup();
+    }
+  }
+
+  // ---------- Screen: Game Setup (target score, first time) ----------
+  function showGameSetup(){
+    hideAllPanels();
+    var game = GAMES[currentGameId];
+    document.getElementById("gameSetupTitle").textContent = gameLabel(game);
+    document.getElementById("targetScore").value = gameState.target;
+    panel("gameSetupPanel").classList.remove("hidden");
+    renderTopControls();
+  }
+
+  document.getElementById("startGameBtn").addEventListener("click", function(){
+    gameState.target = Number(document.getElementById("targetScore").value) || 200;
+    gameState.started = true;
+    ensureDrafts();
+    renderAll();
+  });
+
+  // ---------- Header controls ----------
+  function renderTopControls(){
+    var left = document.getElementById("headerLeft");
+    var center = document.getElementById("headerCenter");
+    var right = document.getElementById("headerRight");
+    left.innerHTML = "";
+    center.innerHTML = "";
+    right.innerHTML = "";
+    if(!roster) return;
+
+    if(currentGameId){
+      var game = GAMES[currentGameId];
+      left.appendChild(el("div", { class: "game-name-brand" }, [
+        el("span", { class: "icon", text: game.icon }),
+        document.createTextNode(gameLabel(game))
+      ]));
+    } else {
+      left.appendChild(el("div", { class: "brand" }, [
+        el("h1", { html: "WHAT'S<span class=\"v\">THE SCORE?</span>" })
+      ]));
+    }
+
+    if(currentGameId && gameState && gameState.started){
+      center.appendChild(el("span", { class: "pill" }, [document.createTextNode("🎯 " + gameState.target)]));
+    }
+
+    if(currentGameId){
+      right.appendChild(el("button", { class: "icon-btn", title: "Settings", "aria-label": "Settings", onclick: toggleSettingsPanel, type: "button", text: "⚙" }));
+    }
+  }
+
+  // ---------- Winner banner ----------
   function renderWinnerBanner(){
     var banner = document.getElementById("winnerBanner");
     banner.innerHTML = "";
-    var maxTotal = Math.max.apply(null, state.players.map(function(p){ return p.total; }));
-    if(maxTotal < state.target) return;
-    var winners = state.players.filter(function(p){ return p.total === maxTotal; });
+    var game = GAMES[currentGameId];
+    var players = mergedPlayers();
+    var totals = players.map(function(p){ return p.total; });
+    var triggerTotal = Math.max.apply(null, totals);
+    if(triggerTotal < gameState.target) return;
+    var bestTotal = game.lowerWins ? Math.min.apply(null, totals) : Math.max.apply(null, totals);
+    var winners = players.filter(function(p){ return p.total === bestTotal; });
     var names = winners.map(function(p){ return p.name; }).join(" & ");
     var newGameBtn = el("button", { class: "btn btn-gold btn-sm", type: "button", text: "🔁 New Game" });
-    newGameBtn.addEventListener("click", startNewGame);
+    newGameBtn.addEventListener("click", resetCurrentGameScores);
     banner.appendChild(el("div", { class: "winner-banner" }, [
       el("div", { class: "txt", text: "🏆 " + names + " WINS!" }),
       newGameBtn
     ]));
   }
 
-  function startNewGame(){
-    state.players.forEach(function(p){ p.total = 0; p.flip7s = 0; });
-    state.log = [];
-    state.draft = {};
-    state.started = false;
+  function resetCurrentGameScores(){
+    gameState.stats = {};
+    gameState.log = [];
+    gameState.draft = {};
+    gameState.started = false;
+    ensureDrafts();
     openPlayerId = null;
-    renderAll();
-    document.getElementById("setupPanel").scrollIntoView({ behavior: "smooth" });
+    showGameSetup();
+    saveGameState();
   }
 
+  // ---------- Screen: Scores ----------
   function renderPlayers(){
     var area = document.getElementById("playersArea");
     var oldRects = {};
@@ -465,21 +756,27 @@
 
     area.innerHTML = "";
     ensureDrafts();
-    var maxTotal = Math.max.apply(null, state.players.map(function(p){ return p.total; }));
-    var sortedPlayers = state.players.slice().sort(function(a, b){ return b.total - a.total; });
+    var game = GAMES[currentGameId];
+    var players = mergedPlayers();
+    var totals = players.map(function(p){ return p.total; });
+    var bestTotal = game.lowerWins ? Math.min.apply(null, totals) : Math.max.apply(null, totals);
+    var anyScored = players.some(function(p){ return p.total !== 0; });
+    var sortedPlayers = players.slice().sort(function(a, b){
+      return game.lowerWins ? (a.total - b.total) : (b.total - a.total);
+    });
 
     sortedPlayers.forEach(function(p){
-      var d = state.draft[p.id];
+      var d = gameState.draft[p.id];
       var isOpen = openPlayerId === p.id;
-      var isLeader = p.total === maxTotal && maxTotal > 0;
+      var isLeader = anyScored && p.total === bestTotal;
 
       var card = el("div", { class: "player-card" + (isOpen ? " open" : "") + (isLeader ? " leader" : ""), "data-player-id": p.id });
 
       var avatar = el("span", { class: "avatar", style: "background:" + p.color + "33; border-color:" + p.color + ";", text: (p.name.trim()[0] || "?").toUpperCase() });
 
-      var remaining = state.target - p.total;
-      var needLabel = (remaining > 0 && remaining < 50)
-        ? el("span", { class: "need-label", text: "You need " + remaining })
+      var remaining = gameState.target - p.total;
+      var needLabel = (!game.lowerWins && remaining > 0 && remaining < 50)
+        ? el("span", { class: "need-label", text: remaining + " to end" })
         : null;
       var scoreCol = el("div", { class: "score-col" }, [
         el("span", { class: "ptotal", text: String(p.total) }),
@@ -502,7 +799,7 @@
       });
       card.appendChild(summary);
 
-      var pct = Math.max(0, Math.min(100, (p.total / state.target) * 100));
+      var pct = Math.max(0, Math.min(100, (p.total / gameState.target) * 100));
       var progress = el("div", { class: "progress-wrap" }, [
         el("div", { class: "progress-track" }, [
           el("div", { class: "progress-fill", style: "width:" + pct + "%; background:" + (isLeader ? "var(--gold)" : p.color) + ";" })
@@ -532,7 +829,7 @@
       if(Math.abs(deltaY) < 1) return;
       child.style.transition = "none";
       child.style.transform = "translateY(" + deltaY + "px)";
-      child.getBoundingClientRect(); // force reflow so the jump above applies before animating
+      child.getBoundingClientRect();
       requestAnimationFrame(function(){
         child.style.transition = "transform 320ms cubic-bezier(.22,.75,.28,1)";
         child.style.transform = "";
@@ -545,16 +842,48 @@
   }
 
   function buildEditor(editor, p, d){
+    var game = GAMES[currentGameId];
     editor.style.setProperty("--accent", p.color);
 
-    editor.appendChild(el("div", { class: "editor-label", text: "Which number cards does " + p.name + " have?" }));
+    var flip7Banner = el("div", { class: "flip7-banner" });
+    var footer = el("div", { class: "editor-footer" });
+    var addBtn = el("button", { class: "btn btn-green btn-sm btn-block", type: "button" });
+    addBtn.addEventListener("click", function(){ commitEntry(p, d, getRoundScore(d, game)); });
+    footer.appendChild(addBtn);
 
-    var currentCount = numberKeys(d).length + (d.lucky13 ? 1 : 0);
+    function refreshFooter(){
+      var result = getRoundScore(d, game);
+      flip7Banner.className = "flip7-banner" + (result.flip7 ? " show" : "");
+      flip7Banner.innerHTML = "";
+      if(result.flip7){
+        flip7Banner.appendChild(el("span", { class: "f7txt", text: "🃏 FLIP 7!" }));
+        flip7Banner.appendChild(el("span", { style: "font-size:12.5px; font-weight:600;", text: "+15 bonus applied" }));
+      }
+      addBtn.textContent = "Add " + result.score + " point" + (Math.abs(result.score) === 1 ? "" : "s");
+      addBtn.disabled = result.score === 0;
+    }
+
+    if(game.editorType === "freeform"){
+      buildFreeformInputs(editor, p, d, refreshFooter);
+    } else {
+      buildCardGridInputs(editor, p, d, game);
+    }
+
+    refreshFooter();
+    editor.appendChild(flip7Banner);
+    editor.appendChild(footer);
+  }
+
+  // "cardgrid" games: Flip-7-style number cards + modifiers (the reusable engine above)
+  function buildCardGridInputs(editor, p, d, game){
+    editor.appendChild(el("div", { class: "editor-label", text: p.name + "'s cards" }));
+
+    var currentCount = numberKeys(d).length + (game.hasLucky13 && d.lucky13 ? 1 : 0);
     var atCap = currentCount >= 7;
 
     var row1 = el("div", { class: "num-grid" });
     var row2 = el("div", { class: "num-grid" });
-    NUMBERS.forEach(function(n){
+    game.numbers.forEach(function(n){
       var active = !!d.numbers[n];
       var btn = el("button", { type: "button", class: "num-btn", "aria-pressed": active ? "true" : "false", text: String(n) });
       btn.disabled = !active && atCap;
@@ -565,10 +894,14 @@
       });
       (n < 7 ? row1 : row2).appendChild(btn);
     });
-    var luckyBtn = el("button", { type: "button", class: "num-btn lucky-btn", "aria-pressed": d.lucky13 ? "true" : "false", text: "Lucky 13" });
-    luckyBtn.disabled = !d.lucky13 && atCap;
-    luckyBtn.addEventListener("click", function(){ buzz(10); d.lucky13 = !d.lucky13; renderPlayers(); });
-    editor.appendChild(el("div", { class: "num-rows" }, [row1, row2, luckyBtn]));
+    var numRowsChildren = [row1, row2];
+    if(game.hasLucky13){
+      var luckyBtn = el("button", { type: "button", class: "num-btn lucky-btn", "aria-pressed": d.lucky13 ? "true" : "false", text: "Lucky 13" });
+      luckyBtn.disabled = !d.lucky13 && atCap;
+      luckyBtn.addEventListener("click", function(){ buzz(10); d.lucky13 = !d.lucky13; renderPlayers(); });
+      numRowsChildren.push(luckyBtn);
+    }
+    editor.appendChild(el("div", { class: "num-rows" }, numRowsChildren));
 
     editor.appendChild(el("div", { class: "editor-label", text: "Modifiers" }));
     function modBtn(labelText, active, onToggle){
@@ -576,96 +909,113 @@
       b.addEventListener("click", function(){ buzz(10); onToggle(); });
       return b;
     }
-    editor.appendChild(el("div", { class: "mod-row" }, [
-      modBtn("−2", d.minus[2], function(){ d.minus[2] = !d.minus[2]; renderPlayers(); }),
-      modBtn("−4", d.minus[4], function(){ d.minus[4] = !d.minus[4]; renderPlayers(); }),
-      modBtn("−6", d.minus[6], function(){ d.minus[6] = !d.minus[6]; renderPlayers(); }),
-      modBtn("−8", d.minus[8], function(){ d.minus[8] = !d.minus[8]; renderPlayers(); }),
-      modBtn("−10", d.minus[10], function(){ d.minus[10] = !d.minus[10]; renderPlayers(); }),
-      el("span", { class: "mod-spacer" }),
-      modBtn("÷2", d.half, function(){ d.half = !d.half; renderPlayers(); })
-    ]));
 
-    var result = computeScore(d);
-
-    var flip7Banner = el("div", { class: "flip7-banner" + (result.flip7 ? " show" : "") });
-    if(result.flip7){
-      flip7Banner.appendChild(el("span", { class: "f7txt", text: "🃏 FLIP 7!" }));
-      flip7Banner.appendChild(el("span", { style: "font-size:12.5px; font-weight:600;", text: "+15 bonus applied" }));
+    var modRowChildren, modRowTheme;
+    if(game.modifierTheme === "penalty"){
+      modRowTheme = "mod-row-penalty";
+      modRowChildren = [
+        modBtn("−2", d.minus[2], function(){ d.minus[2] = !d.minus[2]; renderPlayers(); }),
+        modBtn("−4", d.minus[4], function(){ d.minus[4] = !d.minus[4]; renderPlayers(); }),
+        modBtn("−6", d.minus[6], function(){ d.minus[6] = !d.minus[6]; renderPlayers(); }),
+        modBtn("−8", d.minus[8], function(){ d.minus[8] = !d.minus[8]; renderPlayers(); }),
+        modBtn("−10", d.minus[10], function(){ d.minus[10] = !d.minus[10]; renderPlayers(); }),
+        el("span", { class: "mod-spacer" }),
+        modBtn("÷2", d.half, function(){ d.half = !d.half; renderPlayers(); })
+      ];
+    } else {
+      modRowTheme = "mod-row-bonus";
+      modRowChildren = [
+        modBtn("+2", d.plus[2], function(){ d.plus[2] = !d.plus[2]; renderPlayers(); }),
+        modBtn("+4", d.plus[4], function(){ d.plus[4] = !d.plus[4]; renderPlayers(); }),
+        modBtn("+6", d.plus[6], function(){ d.plus[6] = !d.plus[6]; renderPlayers(); }),
+        modBtn("+8", d.plus[8], function(){ d.plus[8] = !d.plus[8]; renderPlayers(); }),
+        modBtn("+10", d.plus[10], function(){ d.plus[10] = !d.plus[10]; renderPlayers(); }),
+        el("span", { class: "mod-spacer" }),
+        modBtn("×2", d.x2, function(){ d.x2 = !d.x2; renderPlayers(); })
+      ];
     }
-    editor.appendChild(flip7Banner);
+    editor.appendChild(el("div", { class: "mod-row " + modRowTheme }, modRowChildren));
+  }
 
-    var footer = el("div", { class: "editor-footer" });
-    var addBtn = el("button", { class: "btn btn-green btn-sm btn-block", type: "button", text: "Add " + result.score + " point" + (result.score === 1 ? "" : "s") });
-    addBtn.disabled = result.score === 0;
-    addBtn.addEventListener("click", function(){ commitEntry(p, d, result); });
-    footer.appendChild(addBtn);
-    editor.appendChild(footer);
+  // "freeform" games: player does their own maths and enters a single round score
+  function buildFreeformInputs(editor, p, d, refreshFooter){
+    editor.appendChild(el("div", { class: "editor-label", text: p.name + "'s score" }));
+    var input = el("input", {
+      type: "number", inputmode: "numeric", min: "0", class: "freeform-input",
+      value: d.value === undefined ? "" : d.value, placeholder: "0"
+    });
+    input.addEventListener("input", function(){ d.value = input.value; refreshFooter(); });
+    editor.appendChild(input);
   }
 
   function commitEntry(p, d, result){
     buzz(25);
-    var logEntry = { playerId: p.id, playerName: p.name, delta: result.score, flip7: result.flip7 };
-    p.total += result.score;
-    if(result.flip7) p.flip7s++;
+    var st = ensureStats(p.id);
+    st.total += result.score;
+    if(result.flip7) st.flip7s++;
 
-    state.log.push(logEntry);
-    state.draft[p.id] = freshDraft();
+    gameState.log.push({ playerId: p.id, playerName: p.name, delta: result.score, flip7: result.flip7 });
+    gameState.draft[p.id] = freshDraft();
     openPlayerId = null;
     renderAll();
   }
 
-  function renderAll(){
-    renderTopControls();
-    if(state.started){
-      document.getElementById("setupPanel").classList.add("hidden");
-      document.getElementById("gameArea").classList.remove("hidden");
-      renderWinnerBanner();
-      renderPlayers();
-      document.getElementById("undoBtn").disabled = state.log.length === 0;
-    } else {
-      document.getElementById("setupPanel").classList.remove("hidden");
-      document.getElementById("gameArea").classList.add("hidden");
-      renderSetupForm();
-    }
-    save();
-  }
-
-  // ---------- Actions ----------
-  document.getElementById("addPlayerBtn").addEventListener("click", function(){
-    if(state.players.length >= 25) return;
-    var newName = "Player " + (state.players.length + 1);
-    state.players.push({ id: uid(), name: newName, defaultName: newName, total: 0, flip7s: 0, color: colorFor(state.players.length) });
-    renderSetupForm();
-  });
-
-  document.getElementById("startGameBtn").addEventListener("click", function(){
-    state.target = Number(document.getElementById("targetScore").value) || 200;
-    state.players.forEach(function(p){ if(!p.name.trim()) p.name = "Player"; });
-    state.started = true;
-    ensureDrafts();
-    renderAll();
-  });
-
   document.getElementById("undoBtn").addEventListener("click", function(){
-    var entry = state.log.pop();
+    var entry = gameState.log.pop();
     if(!entry) return;
-    var player = state.players.filter(function(p){ return p.id === entry.playerId; })[0];
-    if(player){
-      player.total -= entry.delta;
-      if(entry.flip7) player.flip7s = Math.max(0, player.flip7s - 1);
+    var st = gameState.stats[entry.playerId];
+    if(st){
+      st.total -= entry.delta;
+      if(entry.flip7) st.flip7s = Math.max(0, st.flip7s - 1);
     }
     renderAll();
   });
 
   document.getElementById("resetBtn").addEventListener("click", function(){
-    if(!window.confirm("Reset the whole game? This clears all scores and the activity log.")) return;
-    state = defaultState();
-    openPlayerId = null;
+    if(!window.confirm("Reset scores?")) return;
+    resetCurrentGameScores();
     renderAll();
   });
 
-  renderAll();
+  // ---------- Master render ----------
+  function renderAll(){
+    renderTopControls();
+    if(currentGameId && gameState && gameState.started){
+      hideAllPanels();
+      panel("gameArea").classList.remove("hidden");
+      renderWinnerBanner();
+      renderPlayers();
+      document.getElementById("undoBtn").disabled = gameState.log.length === 0;
+    }
+    saveGameState();
+  }
+
+  // ---------- Init ----------
+  (function init(){
+    roster = loadRoster();
+    var firstRun = !roster;
+    if(!roster) roster = defaultRoster();
+
+    var savedGameId = null;
+    try { savedGameId = localStorage.getItem(ACTIVE_GAME_KEY); } catch(e) { /* no-op */ }
+
+    if(firstRun){
+      showPlayersPanel();
+      return;
+    }
+    if(savedGameId && GAMES[savedGameId]){
+      currentGameId = savedGameId;
+      gameState = loadGameState(savedGameId) || defaultGameState(savedGameId);
+      ensureDrafts();
+      if(gameState.started){
+        renderAll();
+      } else {
+        showGameSetup();
+      }
+    } else {
+      showGamePicker();
+    }
+  })();
 })();
 </script>
 </body>
