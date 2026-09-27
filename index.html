@@ -315,9 +315,9 @@
       started: false,
       target: 200,
       players: [
-        { id: uid(), name: "Player 1", total: 0, flip7s: 0, color: colorFor(0) },
-        { id: uid(), name: "Player 2", total: 0, flip7s: 0, color: colorFor(1) },
-        { id: uid(), name: "Player 3", total: 0, flip7s: 0, color: colorFor(2) }
+        { id: uid(), name: "Player 1", defaultName: "Player 1", total: 0, flip7s: 0, color: colorFor(0) },
+        { id: uid(), name: "Player 2", defaultName: "Player 2", total: 0, flip7s: 0, color: colorFor(1) },
+        { id: uid(), name: "Player 3", defaultName: "Player 3", total: 0, flip7s: 0, color: colorFor(2) }
       ],
       draft: {},
       log: []
@@ -346,7 +346,10 @@
   }
 
   state = load() || defaultState();
-  state.players.forEach(function(p, i){ if(!p.color) p.color = colorFor(i); });
+  state.players.forEach(function(p, i){
+    if(!p.color) p.color = colorFor(i);
+    if(!p.defaultName) p.defaultName = p.name || ("Player " + (i + 1));
+  });
 
   function ensureDrafts(){
     state.players.forEach(function(p){
@@ -412,8 +415,11 @@
     list.innerHTML = "";
     state.players.forEach(function(p, idx){
       var avatar = el("span", { class: "avatar-setup", style: "background:" + p.color + "33; border-color:" + p.color + ";", text: (p.name.trim()[0] || "?").toUpperCase() });
-      var input = el("input", { type: "text", value: p.name, placeholder: "Player name" });
-      input.addEventListener("input", function(){ p.name = input.value; avatar.textContent = (input.value.trim()[0] || "?").toUpperCase(); });
+      var input = el("input", { type: "text", value: (p.name === p.defaultName ? "" : p.name), placeholder: p.defaultName });
+      input.addEventListener("input", function(){
+        p.name = input.value.trim() === "" ? p.defaultName : input.value;
+        avatar.textContent = (p.name.trim()[0] || "?").toUpperCase();
+      });
       var removeBtn = el("button", { class: "remove", type: "button", title: "Remove player", "aria-label": "Remove player", text: "🗑" });
       removeBtn.addEventListener("click", function(){
         if(state.players.length <= 2) return;
@@ -451,16 +457,23 @@
 
   function renderPlayers(){
     var area = document.getElementById("playersArea");
+    var oldRects = {};
+    Array.prototype.forEach.call(area.children, function(child){
+      var pid = child.getAttribute("data-player-id");
+      if(pid) oldRects[pid] = child.getBoundingClientRect();
+    });
+
     area.innerHTML = "";
     ensureDrafts();
     var maxTotal = Math.max.apply(null, state.players.map(function(p){ return p.total; }));
+    var sortedPlayers = state.players.slice().sort(function(a, b){ return b.total - a.total; });
 
-    state.players.forEach(function(p){
+    sortedPlayers.forEach(function(p){
       var d = state.draft[p.id];
       var isOpen = openPlayerId === p.id;
       var isLeader = p.total === maxTotal && maxTotal > 0;
 
-      var card = el("div", { class: "player-card" + (isOpen ? " open" : "") + (isLeader ? " leader" : "") });
+      var card = el("div", { class: "player-card" + (isOpen ? " open" : "") + (isLeader ? " leader" : ""), "data-player-id": p.id });
 
       var avatar = el("span", { class: "avatar", style: "background:" + p.color + "33; border-color:" + p.color + ";", text: (p.name.trim()[0] || "?").toUpperCase() });
 
@@ -502,6 +515,32 @@
       card.appendChild(editor);
 
       area.appendChild(card);
+    });
+
+    playReorderAnimation(area, oldRects);
+  }
+
+  function playReorderAnimation(area, oldRects){
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(reduceMotion) return;
+    Array.prototype.forEach.call(area.children, function(child){
+      var pid = child.getAttribute("data-player-id");
+      var oldRect = oldRects[pid];
+      if(!oldRect) return;
+      var newRect = child.getBoundingClientRect();
+      var deltaY = oldRect.top - newRect.top;
+      if(Math.abs(deltaY) < 1) return;
+      child.style.transition = "none";
+      child.style.transform = "translateY(" + deltaY + "px)";
+      child.getBoundingClientRect(); // force reflow so the jump above applies before animating
+      requestAnimationFrame(function(){
+        child.style.transition = "transform 320ms cubic-bezier(.22,.75,.28,1)";
+        child.style.transform = "";
+        child.addEventListener("transitionend", function handler(){
+          child.style.transition = "";
+          child.removeEventListener("transitionend", handler);
+        });
+      });
     });
   }
 
@@ -557,9 +596,8 @@
     editor.appendChild(flip7Banner);
 
     var footer = el("div", { class: "editor-footer" });
-    var hasEntry = numberKeys(d).length > 0 || d.lucky13;
     var addBtn = el("button", { class: "btn btn-green btn-sm btn-block", type: "button", text: "Add " + result.score + " point" + (result.score === 1 ? "" : "s") });
-    addBtn.disabled = !hasEntry;
+    addBtn.disabled = result.score === 0;
     addBtn.addEventListener("click", function(){ commitEntry(p, d, result); });
     footer.appendChild(addBtn);
     editor.appendChild(footer);
@@ -596,7 +634,8 @@
   // ---------- Actions ----------
   document.getElementById("addPlayerBtn").addEventListener("click", function(){
     if(state.players.length >= 25) return;
-    state.players.push({ id: uid(), name: "Player " + (state.players.length + 1), total: 0, flip7s: 0, color: colorFor(state.players.length) });
+    var newName = "Player " + (state.players.length + 1);
+    state.players.push({ id: uid(), name: newName, defaultName: newName, total: 0, flip7s: 0, color: colorFor(state.players.length) });
     renderSetupForm();
   });
 
