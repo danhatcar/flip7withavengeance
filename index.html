@@ -832,7 +832,9 @@
       if(game.gauntletRule){
         if(gameState.pendingRound.entries.hasOwnProperty(p.id)){
           var isLayer = gameState.pendingRound.order[0] === p.id;
-          needLabel = el("span", { class: "need-label", text: isLayer ? "⚔️ gauntlet · pending" : "⏳ pending" });
+          var enteredRaw = gameState.pendingRound.entries[p.id];
+          var enteredText = (enteredRaw >= 0 ? "+" : "") + enteredRaw;
+          needLabel = el("span", { class: "need-label", text: (isLayer ? "⚔️ gauntlet: " : "⏳ pending: ") + enteredText });
         }
       } else if(!game.lowerWins && remaining > 0 && remaining < 50){
         needLabel = el("span", { class: "need-label", text: remaining + " to end" });
