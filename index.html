@@ -734,6 +734,7 @@
     ]));
   }
 
+  // Used by the winner banner's "New Game" — a fresh game, so it's fair to let you re-pick the target.
   function resetCurrentGameScores(){
     gameState.stats = {};
     gameState.log = [];
@@ -743,6 +744,16 @@
     openPlayerId = null;
     showGameSetup();
     saveGameState();
+  }
+
+  // Used by the persistent "Reset Scores" button — clears the board but stays put, no screen jump.
+  function resetScoresInPlace(){
+    gameState.stats = {};
+    gameState.log = [];
+    gameState.draft = {};
+    ensureDrafts();
+    openPlayerId = null;
+    renderAll();
   }
 
   // ---------- Screen: Scores ----------
@@ -864,7 +875,7 @@
     }
 
     if(game.editorType === "freeform"){
-      buildFreeformInputs(editor, p, d, refreshFooter);
+      buildFreeformInputs(editor, p, d, refreshFooter, addBtn);
     } else {
       buildCardGridInputs(editor, p, d, game);
     }
@@ -938,13 +949,19 @@
   }
 
   // "freeform" games: player does their own maths and enters a single round score
-  function buildFreeformInputs(editor, p, d, refreshFooter){
+  function buildFreeformInputs(editor, p, d, refreshFooter, addBtn){
     editor.appendChild(el("div", { class: "editor-label", text: p.name + "'s score" }));
     var input = el("input", {
       type: "number", inputmode: "numeric", min: "0", class: "freeform-input",
       value: d.value === undefined ? "" : d.value, placeholder: "0"
     });
     input.addEventListener("input", function(){ d.value = input.value; refreshFooter(); });
+    input.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.keyCode === 13){
+        e.preventDefault();
+        if(!addBtn.disabled) addBtn.click();
+      }
+    });
     editor.appendChild(input);
   }
 
@@ -973,8 +990,7 @@
 
   document.getElementById("resetBtn").addEventListener("click", function(){
     if(!window.confirm("Reset scores?")) return;
-    resetCurrentGameScores();
-    renderAll();
+    resetScoresInPlace();
   });
 
   // ---------- Master render ----------
