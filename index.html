@@ -176,17 +176,6 @@
   }
   .winner-banner .txt { font-family: var(--font-display); font-size: 19px; color: var(--ink); letter-spacing: 0.3px; }
 
-  .round-ready { flex-direction: column; align-items: stretch; gap: 12px; background: var(--gold); }
-  .round-summary-list { display: flex; flex-direction: column; gap: 6px; }
-  .round-summary-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    background: rgba(255,255,255,0.55); border: 2px solid var(--ink); border-radius: 10px;
-    padding: 7px 10px; font-weight: 600; font-size: 13.5px;
-  }
-  .rs-name { font-weight: 700; }
-  .rs-value { font-family: var(--font-body); font-weight: 700; }
-  .rs-doubled { color: var(--red-dark); }
-
   .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
   .section-head h2 { font-family: var(--font-display); font-size: 22px; margin: 0; color: var(--ink); letter-spacing: 0.3px; }
   .section-head .hint { font-size: 12px; color: var(--ink-soft); font-weight: 500; }
@@ -215,6 +204,7 @@
   .player-card.open .chevron { transform: rotate(90deg); }
 
   .progress-wrap { padding: 0 14px 13px; }
+  .gauntlet-submit { width: calc(100% - 28px); margin: 0 14px 14px; }
   .progress-track { height: 10px; background: var(--paper-tint); border: 2.5px solid var(--ink); border-radius: 100px; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 100px 0 0 100px; transition: width .2s ease; }
 
@@ -353,7 +343,6 @@
   <div id="gameArea" class="hidden">
 
     <div id="winnerBanner"></div>
-    <div id="roundSummary"></div>
 
     <div class="players" id="playersArea"></div>
 
@@ -818,6 +807,14 @@
       return game.lowerWins ? (a.total - b.total) : (b.total - a.total);
     });
 
+    var gauntletReady = false;
+    var gauntletOutcome = null;
+    if(game.gauntletRule){
+      var allIds = roster.players.map(function(pp){ return pp.id; });
+      gauntletReady = allIds.length > 0 && allIds.every(function(id){ return gameState.pendingRound.entries.hasOwnProperty(id); });
+      if(gauntletReady) gauntletOutcome = computeGauntletOutcome(gameState.pendingRound.entries, gameState.pendingRound.order);
+    }
+
     sortedPlayers.forEach(function(p){
       var d = gameState.draft[p.id];
       var isOpen = openPlayerId === p.id;
@@ -829,12 +826,19 @@
 
       var remaining = gameState.target - p.total;
       var needLabel = null;
+      var isGauntletLayer = false;
       if(game.gauntletRule){
         if(gameState.pendingRound.entries.hasOwnProperty(p.id)){
-          var isLayer = gameState.pendingRound.order[0] === p.id;
+          isGauntletLayer = gameState.pendingRound.order[0] === p.id;
           var enteredRaw = gameState.pendingRound.entries[p.id];
           var enteredText = (enteredRaw >= 0 ? "+" : "") + enteredRaw;
-          needLabel = el("span", { class: "need-label", text: (isLayer ? "⚔️ gauntlet: " : "⏳ pending: ") + enteredText });
+          var labelText;
+          if(isGauntletLayer){
+            labelText = "⚔️ gauntlet: " + enteredText + (gauntletReady ? (gauntletOutcome.layerIsUniqueLowest ? " ✓" : " → ×2") : "");
+          } else {
+            labelText = (gauntletReady ? "⏳ locked: " : "⏳ pending: ") + enteredText;
+          }
+          needLabel = el("span", { class: "need-label", text: labelText });
         }
       } else if(!game.lowerWins && remaining > 0 && remaining < 50){
         needLabel = el("span", { class: "need-label", text: remaining + " to end" });
@@ -867,6 +871,16 @@
         ])
       ]);
       card.appendChild(progress);
+
+      if(gauntletReady && isGauntletLayer){
+        var submitBtn = el("button", { class: "btn btn-gold btn-block gauntlet-submit", type: "button", text: "✅ Submit Round Scores" });
+        submitBtn.addEventListener("click", function(e){
+          e.stopPropagation();
+          finalizeGauntletRound(game);
+          renderAll();
+        });
+        card.appendChild(submitBtn);
+      }
 
       var editor = el("div", { class: "player-editor" });
       if(isOpen) buildEditor(editor, p, d);
@@ -1111,46 +1125,6 @@
     gameState.pendingRound = { entries: {}, order: [] };
   }
 
-  function renderRoundSummary(){
-    var container = document.getElementById("roundSummary");
-    container.innerHTML = "";
-    var game = GAMES[currentGameId];
-    if(!game.gauntletRule) return;
-
-    var entries = gameState.pendingRound.entries;
-    var order = gameState.pendingRound.order;
-    var allIds = roster.players.map(function(p){ return p.id; });
-    var allSubmitted = allIds.length > 0 && allIds.every(function(id){ return entries.hasOwnProperty(id); });
-    if(!allSubmitted) return;
-
-    var outcome = computeGauntletOutcome(entries, order);
-
-    var list = el("div", { class: "round-summary-list" });
-    roster.players.forEach(function(p){
-      var raw = entries[p.id];
-      var isLayer = p.id === outcome.layerId;
-      var doubled = isLayer && !outcome.layerIsUniqueLowest;
-      var finalScore = doubled ? raw * 2 : raw;
-      var valueText = doubled ? (raw + " → ×2 → " + finalScore) : String(finalScore);
-      list.appendChild(el("div", { class: "round-summary-row" }, [
-        el("span", { class: "rs-name", text: p.name + (isLayer ? " ⚔️" : "") }),
-        el("span", { class: "rs-value" + (doubled ? " rs-doubled" : ""), text: valueText })
-      ]));
-    });
-
-    var submitBtn = el("button", { class: "btn btn-gold btn-block", type: "button", text: "✅ Submit Round Scores" });
-    submitBtn.addEventListener("click", function(){
-      finalizeGauntletRound(game);
-      renderAll();
-    });
-
-    container.appendChild(el("div", { class: "winner-banner round-ready" }, [
-      el("div", { class: "txt", text: "🏁 Round Ready" }),
-      list,
-      submitBtn
-    ]));
-  }
-
   document.getElementById("undoBtn").addEventListener("click", function(){
     var last = gameState.log[gameState.log.length - 1];
     if(!last) return;
@@ -1184,7 +1158,6 @@
       hideAllPanels();
       panel("gameArea").classList.remove("hidden");
       renderWinnerBanner();
-      renderRoundSummary();
       renderPlayers();
       document.getElementById("undoBtn").disabled = gameState.log.length === 0;
     }
